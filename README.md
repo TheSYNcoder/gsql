@@ -1,7 +1,8 @@
 # GSQL
 
 [![CI](https://github.com/TheSYNcoder/gsql/actions/workflows/ci.yml/badge.svg)](https://github.com/TheSYNcoder/gsql/actions/workflows/ci.yml)
-[![pre-commit](https://github.com/TheSYNcoder/gsql/actions/workflows/lint.yml/badge.svg)](https://github.com/TheSYNcoder/gsql/actions/workflows/lint.yml)
+[![lint](https://github.com/TheSYNcoder/gsql/actions/workflows/lint.yml/badge.svg)](https://github.com/TheSYNcoder/gsql/actions/workflows/lint.yml)
+[![codecov](https://codecov.io/gh/TheSYNcoder/gsql/branch/master/graph/badge.svg?token=9WOA87MKT0)](https://codecov.io/gh/TheSYNcoder/gsql)
 
 You should be ashamed of yourself as a developer by using google sheets through the browser.
 Use the power of GSQL to use gsheets like never before!
