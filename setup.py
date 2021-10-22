@@ -4,11 +4,11 @@ import setuptools
 with open("requirements.txt", "r") as fh:
     requirements = [line.strip() for line in fh]
 
-__version__ = '1.0.0'
+__version__ = "1.0.0"
 
 setuptools.setup(
     name="gsql",
-    version= __version__,
+    version=__version__,
     author="thesyncoder",
     author_email="sgd030@gmail.com",
     description="A Python application to interact with gsheets through SQL",

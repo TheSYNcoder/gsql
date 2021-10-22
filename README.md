@@ -1,9 +1,13 @@
 # GSQL
 
- Using gsheets through the browser, you should be ashamed of yourself as a developer.
- Use the power of GSQL to use gsheets like never before!
+You should be ashamed of yourself as a developer by using google sheets through the browser.
+Use the power of GSQL to use gsheets like never before!
 
+## Under construction 🚧🚧
 
+## Usage 
+
+Coming soon ...
 
 ### Development
 
@@ -23,3 +27,12 @@ Install further dependencies using
 ```
     $ pip install requirements.txt    
 ```
+
+Before making a pull request
+
+```
+$ pre-commit run --all-files
+$ pytest
+
+```
+All tests should pass
