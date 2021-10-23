@@ -2,4 +2,6 @@
 omit =
     setup.py    
     gsql/tests/test*
+    gsql/_version.py
+    versioneer.py
     
