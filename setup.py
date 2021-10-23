@@ -1,19 +1,20 @@
 import setuptools
-
+import versioneer
 
 with open("requirements.txt", "r") as fh:
     requirements = [line.strip() for line in fh]
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
-__version__ = "1.0.0"
 
 setuptools.setup(
     name="gsql",
-    version=__version__,
+    version=versioneer.get_version(),
     author="thesyncoder",
     author_email="sgd030@gmail.com",
     description="A Python application to interact with gsheets through SQL",
-    long_description="A Python application to interact with gsheets through SQL",
-    long_description_content_type="text/x-rst",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
