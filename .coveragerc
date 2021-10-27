@@ -1,7 +1,7 @@
 [run]
 omit =
     setup.py    
-    gsql/tests/test*
+    tests/test*
     gsql/_version.py
     versioneer.py
     
