@@ -35,8 +35,14 @@ Install further dependencies using
 Before making a pull request
 
 ```
-$ pre-commit run --all-files
-$ pytest
+    $ pre-commit run --all-files
+    $ pytest
 
 ```
 All tests should pass
+
+Any change in the version is done through git
+
+```
+    $ git tag 1.0.1
+```
