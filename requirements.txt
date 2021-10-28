@@ -26,6 +26,7 @@ Pygments==2.10.0
 pyparsing==2.4.7
 pytest==6.2.5
 pytest-cov==3.0.0
+pytest-mock==3.6.1
 PyYAML==6.0
 regex==2021.10.21
 rich==10.12.0
