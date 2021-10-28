@@ -28,7 +28,7 @@ gsql_text = """
 class GSQLShell(cmd.Cmd):
 
     intro = gsql_text
-    prompt = "GSQL >"
+    prompt = "GSQL > "
 
     def __init__(self) -> None:
         super(GSQLShell, self).__init__()
@@ -107,7 +107,7 @@ class GSQLShell(cmd.Cmd):
                 console.print("[red]Database with {id} not found[/]")
             time.sleep(3)
         sheet_name = list(filter(lambda x: x["id"] == sheet_id, self.sheets))[0]["name"]
-        self.prompt = "GSQL (" + sheet_name.replace(" ", "")[:10] + ") >"
+        self.prompt = "GSQL (" + sheet_name.replace(" ", "")[:10] + ") > "
         console.print(f"[green]Connected to {str(sheet_id)}[/]")
 
     def do_disconnect(self, args):
@@ -121,7 +121,7 @@ class GSQLShell(cmd.Cmd):
         """
 
         # TODO make api call and remove from cache
-        self.prompt = "GSQL >"
+        self.prompt = "GSQL > "
         console.print("[green]Disconnected successfully[/]")
 
     def do_clear(self, args):
@@ -133,11 +133,15 @@ class GSQLShell(cmd.Cmd):
         else:
             _ = os.system("cls")
 
-    def pre_cmd(self, line):
+    def precmd(self, line):
         """
         Converts the current line to lowercase
         """
-        line = line.lower()
+        tokens = str(line).split()
+        if tokens[0].lower() == "connect":
+            line = "connect " + " ".join(token for token in tokens[1:])
+        else:
+            line = line.lower()
         return line
 
     def do_exit(self, args):

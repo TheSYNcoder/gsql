@@ -25,7 +25,7 @@ def get_action_from_argument(args) -> str:
 
     The action is a string and is one of
 
-    'LOGIN' | 'LOGOUT' | 'HELP' | 'SHOW' | 'CLEAR' | 'SHELL' | 'ERROR'
+    'LOGIN' | 'LOGOUT' | 'HELP' | 'SHOW' | 'SHELL' | 'ERROR'
     """
 
     if len(args) == 1:
@@ -40,8 +40,6 @@ def get_action_from_argument(args) -> str:
         return Commands.LOGOUT_COMMAND
     elif command == "show":
         return Commands.SHOW_COMMAND
-    elif command == "clear":
-        return Commands.CLEAR_COMMAND
     elif command == "h" or command == "help":
         return Commands.HELP_COMMAND
     else:

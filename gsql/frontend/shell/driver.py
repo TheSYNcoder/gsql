@@ -17,11 +17,8 @@ class GSQLDriver:
     def authenticate(self):
         print("Authenticate")
 
-    def clear_shell(self):
-        print("shell clear")
-
     def logout(self):
-        print("login")
+        print("logout")
 
     def show(self):
         print("show")
@@ -45,8 +42,6 @@ class GSQLDriver:
             self.show()
         elif self.action == Commands.HELP_COMMAND:
             self.show_help()
-        elif self.action == Commands.CLEAR_COMMAND:
-            self.clear_shell()
         elif self.action == Commands.ERROR:
             self.error_()
         else:

@@ -3,6 +3,7 @@
 [![CI](https://github.com/TheSYNcoder/gsql/actions/workflows/ci.yml/badge.svg)](https://github.com/TheSYNcoder/gsql/actions/workflows/ci.yml)
 [![lint](https://github.com/TheSYNcoder/gsql/actions/workflows/lint.yml/badge.svg)](https://github.com/TheSYNcoder/gsql/actions/workflows/lint.yml)
 [![codecov](https://codecov.io/gh/TheSYNcoder/gsql/branch/master/graph/badge.svg?token=9WOA87MKT0)](https://codecov.io/gh/TheSYNcoder/gsql)
+[![black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 You should be ashamed of yourself as a developer by using google sheets through the browser.
 Use the power of GSQL to use gsheets like never before!

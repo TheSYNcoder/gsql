@@ -16,6 +16,56 @@ def test_main_app(monkeypatch, caplog):
     assert caplog.records[1].msg == "GSQL called with action :{}".format("SHELL")
 
 
+def test_main_app_with_authenticate(caplog, capsys):
+    sys.argv = ["gsql", "login"]
+
+    app()
+    assert caplog.records[0].msg == "GSQL APP INIT"
+    assert caplog.records[1].msg == "GSQL called with action :{}".format("LOGIN")
+    captured = capsys.readouterr()
+    assert "Authenticate" in captured.out
+
+
+def test_main_app_with_logout(caplog, capsys):
+    sys.argv = ["gsql", "logout"]
+
+    app()
+    assert caplog.records[0].msg == "GSQL APP INIT"
+    assert caplog.records[1].msg == "GSQL called with action :{}".format("LOGOUT")
+    captured = capsys.readouterr()
+    assert "logout" in captured.out
+
+
+def test_main_app_with_show(caplog, capsys):
+    sys.argv = ["gsql", "show"]
+
+    app()
+    assert caplog.records[0].msg == "GSQL APP INIT"
+    assert caplog.records[1].msg == "GSQL called with action :{}".format("SHOW")
+    captured = capsys.readouterr()
+    assert "show" in captured.out
+
+
+def test_main_app_with_help(caplog, capsys):
+    sys.argv = ["gsql", "help"]
+
+    app()
+    assert caplog.records[0].msg == "GSQL APP INIT"
+    assert caplog.records[1].msg == "GSQL called with action :{}".format("HELP")
+    captured = capsys.readouterr()
+    assert "help" in captured.out
+
+
+def test_main_app_with_error(caplog, capsys):
+    sys.argv = ["gsql", "error"]
+
+    app()
+    assert caplog.records[0].msg == "GSQL APP INIT"
+    assert caplog.records[1].msg == "GSQL called with action :{}".format("ERROR")
+    captured = capsys.readouterr()
+    assert "error" in captured.out
+
+
 def test_arguments_gsql_shell(caplog):
     sys.argv = ["gsql"]
     action = get_arguments()
@@ -34,13 +84,6 @@ def test_arguments_gsql_logout(caplog):
     sys.argv = ["gsql", "logout"]
     action = get_arguments()
     assert action == Commands.LOGOUT_COMMAND
-
-
-def test_arguments_gsql_clear(caplog):
-
-    sys.argv = ["gsql", "clear"]
-    action = get_arguments()
-    assert action == Commands.CLEAR_COMMAND
 
 
 def test_arguments_gsql_show(caplog):
