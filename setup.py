@@ -23,4 +23,9 @@ setuptools.setup(
     ],
     python_requires=">=3.6",
     install_requires=requirements,
+    entry_points={
+        "console_scripts": [
+            "gsql = gsql.main:app",
+        ],
+    },
 )

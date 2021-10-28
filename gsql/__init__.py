@@ -1,4 +1,4 @@
-from .hello import app
+from .main import app
 
 from ._version import get_versions
 
