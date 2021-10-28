@@ -104,7 +104,8 @@ class GSQLShell(cmd.Cmd):
         with console.status("Attempting to connect ....", spinner="bouncingBall"):
             # TODO call API synchronous call
             if sheet_id not in [item["id"] for item in self.sheets]:
-                console.print("[red]Database with {id} not found[/]")
+                console.print(f"[red]Database with id: {sheet_id} not found[/]")
+                return
             time.sleep(3)
         sheet_name = list(filter(lambda x: x["id"] == sheet_id, self.sheets))[0]["name"]
         self.prompt = "GSQL (" + sheet_name.replace(" ", "")[:10] + ") > "

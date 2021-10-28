@@ -4,4 +4,5 @@ omit =
     tests/test*
     gsql/_version.py
     versioneer.py
+    gsql/logging.py
     
