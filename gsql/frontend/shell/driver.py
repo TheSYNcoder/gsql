@@ -15,9 +15,15 @@ class GSQLDriver:
         self.shell_instance = GSQLShell()
 
     def authenticate(self):
+        # err=Auth.auth()
+        # if err:
+        #     logger.error("Authentication failed: {}".format(err))
         print("Authenticate")
 
     def logout(self):
+        # err=Auth.logout()
+        # if err:
+        #     logger.error("Logout failed: {}".format(err))
         print("logout")
 
     def show(self):
