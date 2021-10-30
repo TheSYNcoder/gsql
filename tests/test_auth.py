@@ -1,4 +1,4 @@
-from gsql.backend.auth import os, Auth, Credentials, sys, InstalledAppFlow
+from gsql.backend.auth import os, Auth, Credentials, InstalledAppFlow
 from googleapiclient import errors
 
 
@@ -88,7 +88,6 @@ def test_login_expired_error_refresh(mocker, monkeypatch, caplog):
     mocker.patch.object(os.path, "exists")
     os.path.exists.return_value = True
     mocker.patch.object(os, "makedirs")
-    mocker.patch.object(sys, "exit")
 
     class Cred_mock:
         def __init__(self) -> None:
@@ -120,7 +119,6 @@ def test_login_again_error_file(mocker, monkeypatch, caplog):
     mocker.patch.object(os.path, "exists")
     os.path.exists.return_value = True
     mocker.patch.object(os, "makedirs")
-    mocker.patch.object(sys, "exit")
 
     def mock_cred_making(*args, **kwargs):
         return False
@@ -178,7 +176,6 @@ def test_login_again_error_flow(mocker, monkeypatch, caplog):
     mocker.patch.object(os.path, "exists")
     os.path.exists.return_value = True
     mocker.patch.object(os, "makedirs")
-    mocker.patch.object(sys, "exit")
 
     def mock_cred_making(*args, **kwargs):
         return False
