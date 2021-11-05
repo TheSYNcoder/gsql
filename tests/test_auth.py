@@ -65,7 +65,7 @@ def test_login_expired_cred(mocker, monkeypatch, caplog):
             self.refresh_token = True
 
         def refresh(*args, **kwargs):
-            print("mock")
+            return
 
     def mock_cred_making(*args, **kwargs):
         return Cred_mock()
@@ -104,11 +104,8 @@ def test_login_expired_error_refresh(mocker, monkeypatch, caplog):
 
     monkeypatch.setattr(Credentials, "from_authorized_user_file", mock_cred_making)
 
-    def mock_Auth_save_token(*args, **kwargs):
-        print("mock")
-
-    monkeypatch.setattr(Auth, "save_token", mock_Auth_save_token)
     instance = Auth()
+    instance.save_token = lambda x: x
     instance.auth()
     assert caplog.records[0].msg == "importing cred from token.json"
     assert caplog.records[1].msg == "refresh token called!!!"
@@ -127,12 +124,8 @@ def test_login_again_error_file(mocker, monkeypatch, caplog):
 
     monkeypatch.setattr(Credentials, "from_authorized_user_file", mock_cred_making)
 
-    def mock_Auth_save_token(*args, **kwargs):
-        print("mock")
-
-    monkeypatch.setattr(Auth, "save_token", mock_Auth_save_token)
-
     instance = Auth()
+    instance.save_token = lambda x: x
     instance.auth()
     assert caplog.records[0].msg == "importing cred from token.json"
     assert caplog.records[1].msg == "relogin called"
@@ -154,11 +147,6 @@ def test_login_again_success(mocker, monkeypatch, caplog):
 
     monkeypatch.setattr(Credentials, "from_authorized_user_file", mock_cred_making)
 
-    def mock_Auth_save_token(*args, **kwargs):
-        print("mock")
-
-    monkeypatch.setattr(Auth, "save_token", mock_Auth_save_token)
-
     class Mock_flow:
         def run_local_server(*args, **kwargs):
             return True
@@ -168,6 +156,7 @@ def test_login_again_success(mocker, monkeypatch, caplog):
 
     monkeypatch.setattr(InstalledAppFlow, "from_client_secrets_file", mock_flow)
     instance = Auth()
+    instance.save_token = lambda: True
     instance.auth()
     assert caplog.records[0].msg == "importing cred from token.json"
     assert caplog.records[1].msg == "relogin called"
@@ -186,11 +175,6 @@ def test_login_again_error_flow_error(mocker, monkeypatch, caplog):
 
     monkeypatch.setattr(Credentials, "from_authorized_user_file", mock_cred_making)
 
-    def mock_Auth_save_token(*args, **kwargs):
-        print("mock")
-
-    monkeypatch.setattr(Auth, "save_token", mock_Auth_save_token)
-
     class Mock_flow:
         def run_local_server(*args, **kwargs):
             raise errors.Error("error")
@@ -200,6 +184,8 @@ def test_login_again_error_flow_error(mocker, monkeypatch, caplog):
 
     monkeypatch.setattr(InstalledAppFlow, "from_client_secrets_file", mock_flow)
     instance = Auth()
+    instance.save_token = lambda x: x
+
     instance.auth()
     assert caplog.records[0].msg == "importing cred from token.json"
     assert caplog.records[1].msg == "relogin called"
@@ -218,11 +204,6 @@ def test_login_again_error_flow_exception(mocker, monkeypatch, caplog):
 
     monkeypatch.setattr(Credentials, "from_authorized_user_file", mock_cred_making)
 
-    def mock_Auth_save_token(*args, **kwargs):
-        print("mock")
-
-    monkeypatch.setattr(Auth, "save_token", mock_Auth_save_token)
-
     class Mock_flow:
         def run_local_server(*args, **kwargs):
             raise Exception("exception")
@@ -232,7 +213,26 @@ def test_login_again_error_flow_exception(mocker, monkeypatch, caplog):
 
     monkeypatch.setattr(InstalledAppFlow, "from_client_secrets_file", mock_flow)
     instance = Auth()
+    instance.save_token = lambda x: x
     instance.auth()
     assert caplog.records[0].msg == "importing cred from token.json"
     assert caplog.records[1].msg == "relogin called"
     assert caplog.records[2].msg == "Error returned -> exception"
+
+
+def test_save_token(monkeypatch, mocker):
+    mocker.patch.object(os.path, "join")
+    os.path.join.return_value = "temp/"
+    mocker.patch.object(os.path, "exists")
+    os.path.exists.return_value = True
+    mocker.patch.object(os, "makedirs")
+
+    class mock_cred_obj:
+        def to_json(self):
+            return "cred"
+
+    m = mocker.patch("builtins.open", mocker.mock_open())
+    instance = Auth()
+    instance.creds = mock_cred_obj()
+    instance.save_token()
+    m.assert_called_with("temp/", "w")

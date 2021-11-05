@@ -17,10 +17,9 @@ class Auth:
         self.store_folder = os.path.join(os.path.expanduser("~"), ".gsql")
         os.makedirs(self.store_folder, exist_ok=True)
 
-    @staticmethod
-    def save_token(creds, store_folder):
-        with open(store_folder + "/token.json", "w") as token:
-            token.write(creds.to_json())
+    def save_token(self):
+        with open(os.path.join(self.store_folder, "token.json"), "w") as token:
+            token.write(self.creds.to_json())
 
     def auth(self):
         # The file token.json stores the user's access and refresh tokens, and is
@@ -28,7 +27,7 @@ class Auth:
         # time.
         if os.path.exists(self.store_folder + "/token.json"):
             self.creds = Credentials.from_authorized_user_file(
-                self.store_folder + "/token.json", SCOPES
+                os.path.join(self.store_folder, "token.json"), SCOPES
             )
             logger.debug("importing cred from token.json")
         # If there are no (valid) credentials available, let the user log in.
@@ -46,13 +45,13 @@ class Auth:
                 if err:
                     return err
             # Save the credentials for the next run
-            Auth.save_token(self.creds, self.store_folder)
+            self.save_token()
         logger.debug("Authentication successfull")
 
     def login(self):
         try:
             flow = InstalledAppFlow.from_client_secrets_file(
-                self.store_folder + "/credentials.json", SCOPES
+                os.path.join(self.store_folder, "credentials.json"), SCOPES
             )
             self.creds = flow.run_local_server(port=8080)
         except FileNotFoundError as err:
