@@ -5,6 +5,7 @@ import sys
 import pytest
 from gsql.main import app
 import io
+from gsql.frontend.shell.driver import Auth
 
 
 def test_main_app(monkeypatch, caplog):
@@ -16,24 +17,42 @@ def test_main_app(monkeypatch, caplog):
     assert caplog.records[1].msg == "GSQL called with action :{}".format("SHELL")
 
 
-def test_main_app_with_authenticate(caplog, capsys):
-    sys.argv = ["gsql", "login"]
+def test_main_app_with_authenticate_success(caplog, capsys):
 
+    Auth.auth = lambda x: False
+    sys.argv = ["gsql", "login"]
     app()
     assert caplog.records[0].msg == "GSQL APP INIT"
     assert caplog.records[1].msg == "GSQL called with action :{}".format("LOGIN")
-    captured = capsys.readouterr()
-    assert "Authenticate" in captured.out
+    assert caplog.records[2].msg == "Authentication successfull"
 
 
-def test_main_app_with_logout(caplog, capsys):
+def test_main_app_with_authenticate_fail(caplog, capsys):
+
+    Auth.auth = lambda x: True
+    sys.argv = ["gsql", "login"]
+    app()
+    assert caplog.records[0].msg == "GSQL APP INIT"
+    assert caplog.records[1].msg == "GSQL called with action :{}".format("LOGIN")
+    assert caplog.records[2].msg == "Authentication failed: True"
+
+
+def test_main_app_with_logout_success(caplog, capsys):
+    Auth.logout = lambda x: False
     sys.argv = ["gsql", "logout"]
-
     app()
     assert caplog.records[0].msg == "GSQL APP INIT"
     assert caplog.records[1].msg == "GSQL called with action :{}".format("LOGOUT")
-    captured = capsys.readouterr()
-    assert "logout" in captured.out
+    assert caplog.records[2].msg == "Logout successfull"
+
+
+def test_main_app_with_logout_failed(caplog, capsys):
+    Auth.logout = lambda x: True
+    sys.argv = ["gsql", "logout"]
+    app()
+    assert caplog.records[0].msg == "GSQL APP INIT"
+    assert caplog.records[1].msg == "GSQL called with action :{}".format("LOGOUT")
+    assert caplog.records[2].msg == "Logout failed: True"
 
 
 def test_main_app_with_show(caplog, capsys):
