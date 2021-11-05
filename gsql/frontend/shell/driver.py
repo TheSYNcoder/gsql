@@ -2,6 +2,8 @@ from gsql.frontend.constants import Commands
 from gsql.logging import logger
 from gsql.frontend.shell.shell import GSQLShell
 from rich import print
+from gsql.backend.auth import Auth
+from gsql.console import console
 
 
 class GSQLDriver:
@@ -15,16 +17,24 @@ class GSQLDriver:
         self.shell_instance = GSQLShell()
 
     def authenticate(self):
-        # err=Auth.auth()
-        # if err:
-        #     logger.error("Authentication failed: {}".format(err))
-        print("Authenticate")
+        auth = Auth()
+        err = auth.auth()
+        if err:
+            logger.error("Authentication failed: {}".format(err))
+            console.print("[red]Authentication failed!!!")
+        else:
+            logger.debug("Authentication successfull")
+            console.print("[green]Authentication successfull")
 
     def logout(self):
-        # err=Auth.logout()
-        # if err:
-        #     logger.error("Logout failed: {}".format(err))
-        print("logout")
+        auth = Auth()
+        err = auth.logout()
+        if err:
+            logger.error("Logout failed: {}".format(err))
+            console.print("[red]Logout failed!!![/]")
+        else:
+            logger.debug("Logout successfull")
+            console.print("[green]Logout successfull[/]")
 
     def show(self):
         print("show")

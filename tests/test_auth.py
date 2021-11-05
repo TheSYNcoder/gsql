@@ -79,7 +79,8 @@ def test_login_expired_cred(mocker, monkeypatch, caplog):
     instance = Auth()
     instance.auth()
     assert caplog.records[0].msg == "importing cred from token.json"
-    assert caplog.records[1].msg == "Authentication successfull"
+    assert caplog.records[1].msg == "refresh token called!!!"
+    assert caplog.records[2].msg == "Authentication successfull"
 
 
 def test_login_expired_error_refresh(mocker, monkeypatch, caplog):
@@ -110,7 +111,8 @@ def test_login_expired_error_refresh(mocker, monkeypatch, caplog):
     instance = Auth()
     instance.auth()
     assert caplog.records[0].msg == "importing cred from token.json"
-    assert caplog.records[1].msg == "Authentication failed: mock"
+    assert caplog.records[1].msg == "refresh token called!!!"
+    assert caplog.records[2].msg == "Authentication failed: mock"
 
 
 def test_login_again_error_file(mocker, monkeypatch, caplog):
@@ -133,8 +135,9 @@ def test_login_again_error_file(mocker, monkeypatch, caplog):
     instance = Auth()
     instance.auth()
     assert caplog.records[0].msg == "importing cred from token.json"
+    assert caplog.records[1].msg == "relogin called"
     assert (
-        caplog.records[1].msg
+        caplog.records[2].msg
         == "Credentials.json file not found in specified directory"
     )
 
@@ -167,10 +170,11 @@ def test_login_again_success(mocker, monkeypatch, caplog):
     instance = Auth()
     instance.auth()
     assert caplog.records[0].msg == "importing cred from token.json"
-    assert caplog.records[1].msg == "Authentication successfull"
+    assert caplog.records[1].msg == "relogin called"
+    assert caplog.records[2].msg == "Authentication successfull"
 
 
-def test_login_again_error_flow(mocker, monkeypatch, caplog):
+def test_login_again_error_flow_error(mocker, monkeypatch, caplog):
     mocker.patch.object(os.path, "join")
     os.path.join.return_value = "temp/"
     mocker.patch.object(os.path, "exists")
@@ -189,7 +193,7 @@ def test_login_again_error_flow(mocker, monkeypatch, caplog):
 
     class Mock_flow:
         def run_local_server(*args, **kwargs):
-            raise errors.Error("mock")
+            raise errors.Error("error")
 
     def mock_flow(*args, **kwargs):
         return Mock_flow()
@@ -198,4 +202,37 @@ def test_login_again_error_flow(mocker, monkeypatch, caplog):
     instance = Auth()
     instance.auth()
     assert caplog.records[0].msg == "importing cred from token.json"
-    assert caplog.records[1].msg == "Error returned -> mock"
+    assert caplog.records[1].msg == "relogin called"
+    assert caplog.records[2].msg == "Error returned -> error"
+
+
+def test_login_again_error_flow_exception(mocker, monkeypatch, caplog):
+    mocker.patch.object(os.path, "join")
+    os.path.join.return_value = "temp/"
+    mocker.patch.object(os.path, "exists")
+    os.path.exists.return_value = True
+    mocker.patch.object(os, "makedirs")
+
+    def mock_cred_making(*args, **kwargs):
+        return False
+
+    monkeypatch.setattr(Credentials, "from_authorized_user_file", mock_cred_making)
+
+    def mock_Auth_save_token(*args, **kwargs):
+        print("mock")
+
+    monkeypatch.setattr(Auth, "save_token", mock_Auth_save_token)
+
+    class Mock_flow:
+        def run_local_server(*args, **kwargs):
+            raise Exception("exception")
+
+    def mock_flow(*args, **kwargs):
+        return Mock_flow()
+
+    monkeypatch.setattr(InstalledAppFlow, "from_client_secrets_file", mock_flow)
+    instance = Auth()
+    instance.auth()
+    assert caplog.records[0].msg == "importing cred from token.json"
+    assert caplog.records[1].msg == "relogin called"
+    assert caplog.records[2].msg == "Error returned -> exception"

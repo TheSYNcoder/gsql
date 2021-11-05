@@ -11,16 +11,18 @@ class ApiHandler:
         """
         try:
             self.gdriveService = build(
-                serviceName="sheets", version="v4", credentials=self.creds
+                serviceName="drive", version="v3", credentials=self.creds
             )
             self.sheetService = build(
-                serviceName="drive", version="v2", credentials=self.creds
+                serviceName="sheets", version="v4", credentials=self.creds
             )
         except errors.Error as err:
             logger.error("driver creation failed with error: {}".format(err))
+        except Exception as err:
+            logger.error("driver creation failed with error: {}".format(err))
 
     #    creation apis
-
+    # return spreadsheetId of newly created spreadsheet else error
     def createSpreadsheet(self, spreadsheetTitle):
         logger.debug(
             "createSpreadsheet called with sheetTitle: {}".format(spreadsheetTitle)
@@ -39,11 +41,19 @@ class ApiHandler:
                 )
             )
             return err
-        return spreadsheet
+        except Exception as err:
+            logger.error(
+                "creation of spreadheet with title({}) failed with error: {}".format(
+                    spreadsheetTitle, err
+                )
+            )
+            return err
+        return spreadsheet.get("spreadsheetId")
 
+    # return sheetId else error
     def createTabInsideSpreadsheet(self, spreadsheetId, tabTitle):
         logger.debug(
-            "createTabInsideSpreadsheet called with spreadheetId: {} , tabTitle: {}".format(
+            "createTabInsideSpreadsheet called with spreadheetId: {}, tabTitle: {}".format(
                 spreadsheetId, tabTitle
             )
         )
@@ -67,11 +77,18 @@ class ApiHandler:
         except errors.Error as err:
             logger.error(
                 "creation of tab({}) inside spreadsheet({})  failed with error: {}".format(
-                    spreadsheetId, tabTitle, err
+                    tabTitle, spreadsheetId, err
                 )
             )
             return err
-        return result
+        except Exception as err:
+            logger.error(
+                "creation of tab({}) inside spreadsheet({})  failed with error: {}".format(
+                    tabTitle, spreadsheetId, err
+                )
+            )
+            return err
+        return result.get("replies")[0].get("addSheet").get("properties").get("sheetId")
 
     # cloning apis
     def copySheetFromSpreadsheetToOtherSpreadsheet(
@@ -100,17 +117,23 @@ class ApiHandler:
                 )
             )
             return err
-        return result
+        except Exception as err:
+            logger.error(
+                "copySheetFromSpreadsheetToOtherSpreadsheet failed with error: {}".format(
+                    err
+                )
+            )
+            return err
+        return {"sheetId": result.get("sheetId"), "title": result.get("title")}
 
-    def cloneSpreadsheet(self, spreadsheetId, newSpreadsheetTitle, parentFolderId):
+    def cloneSpreadsheet(self, spreadsheetId, newSpreadsheetTitle):
         logger.debug(
-            "cloneSpreadsheet called with spreadsheetId:{} , newSpreadsheetTitle: {},parentFolderId: {}".format(
-                spreadsheetId, newSpreadsheetTitle, parentFolderId
+            "cloneSpreadsheet called with spreadsheetId: {} , newSpreadsheetTitle: {}".format(
+                spreadsheetId, newSpreadsheetTitle
             )
         )
         copied_file = {
             "title": newSpreadsheetTitle,
-            "parents": [{"id": parentFolderId}],
         }
         try:
             result = (
@@ -121,34 +144,40 @@ class ApiHandler:
         except errors.Error as err:
             logger.error("cloneSpreadsheet failed with error: {}".format(err))
             return err
-        return result
+        except Exception as err:
+            logger.error("cloneSpreadsheet failed with error: {}".format(err))
+            return err
+        return {"id": result.get("id")}
 
     # deleting apis
-    def clearValuesFromSpreadsheet(self, spreadsheetId, requestBody):
+    def clearValuesFromSpreadsheet(self, spreadsheetId, range):
         logger.debug(
-            "clearValuesFromSpreadsheet called with spreadsheetId: {}, requestbody: {}".format(
-                spreadsheetId, requestBody
+            "clearValuesFromSpreadsheet called with spreadsheetId: {}, range: {}".format(
+                spreadsheetId, range
             )
         )
         try:
             result = (
                 self.sheetService.spreadsheets()
                 .values()
-                .clear(spreadsheetId=spreadsheetId, range=requestBody)
+                .clear(spreadsheetId=spreadsheetId, range=range)
                 .execute()
             )
         except errors.Error as err:
             logger.error("clearValuesFromSpreadsheet failed with error: {}".format(err))
             return err
+        except Exception as err:
+            logger.error("clearValuesFromSpreadsheet failed with error: {}".format(err))
+            return err
         return result
 
-    def deleteTabFromSpreadsheet(self, spreadsheetId, sheetName):
+    def deleteTabFromSpreadsheet(self, spreadsheetId, sheetId):
         logger.debug(
-            "deleteTabFromSpreadsheet called with spreadsheetId: {}, sheetName: {}".format(
-                spreadsheetId, sheetName
+            "deleteTabFromSpreadsheet called with spreadsheetId: {}, sheetId: {}".format(
+                spreadsheetId, sheetId
             )
         )
-        body = {"requests": [{"deleteSheet": {"sheetId": sheetName}}]}
+        body = {"requests": [{"deleteSheet": {"sheetId": sheetId}}]}
         try:
             result = (
                 self.sheetService.spreadsheets()
@@ -156,6 +185,9 @@ class ApiHandler:
                 .execute()
             )
         except errors.Error as err:
+            logger.error("deleteTabFromSpreadsheet failed with error: {}".format(err))
+            return err
+        except Exception as err:
             logger.error("deleteTabFromSpreadsheet failed with error: {}".format(err))
             return err
         return result
@@ -167,6 +199,9 @@ class ApiHandler:
         try:
             result = self.gdriveService.files().delete(fileId=spreadsheetId).execute()
         except errors.Error as err:
+            logger.error("deleteSpreadsheet failed with error: {}".format(err))
+            return err
+        except Exception as err:
             logger.error("deleteSpreadsheet failed with error: {}".format(err))
             return err
         return result
@@ -183,11 +218,15 @@ class ApiHandler:
                 .get(spreadsheetId=spreadsheetId)
                 .execute()
             )
+            print(spreadsheet)
             result = {}
             result["spreadsheetId"] = spreadsheet["spreadsheetId"]
             result["title"] = spreadsheet["properties"]["title"]
             result["sheets"] = spreadsheet["sheets"]
         except errors.Error as err:
+            logger.error("getSpreadsheetInfo failed with error: {}".format(err))
+            return err
+        except Exception as err:
             logger.error("getSpreadsheetInfo failed with error: {}".format(err))
             return err
         return result
@@ -201,7 +240,7 @@ class ApiHandler:
         result = {}
         for sheet in sheets:
             res = self.getSheetData(spreadsheetId=spreadsheetId, sheetName=sheet)
-            if type(res) is errors.Error:
+            if type(res) is errors.Error or type(res) is Exception:
                 return res
             else:
                 result[sheet] = res
@@ -218,12 +257,18 @@ class ApiHandler:
                 self.sheetService.spreadsheets()
                 .values()
                 .get(spreadsheetId=spreadsheetId, range=sheetName)
-                .execute()["values"]
+                .execute()
             )
         except errors.Error as err:
             logger.error("getSheetData failed with error : {}".format(err))
             return err
-        return result
+        except Exception as err:
+            logger.error("getSheetData failed with error : {}".format(err))
+            return err
+        if "values" in result.keys():
+            return result["values"]
+        else:
+            return [[]]
 
     def getAllSpreadsheetInfo(self):
         logger.debug("getAllSpreadsheetInfo called")
@@ -235,7 +280,6 @@ class ApiHandler:
                     self.gdriveService.files()
                     .list(
                         q="mimeType='application/vnd.google-apps.spreadsheet'",
-                        spaces="drive",
                         fields="nextPageToken, files(id, name)",
                         pageToken=page_token,
                     )
@@ -244,10 +288,13 @@ class ApiHandler:
             except errors.Error as err:
                 logger.error("getAllSpreadsheetInfo failed with error: {}".format(err))
                 return err
+            except Exception as err:
+                logger.error("getAllSpreadsheetInfo failed with error: {}".format(err))
+                return err
             for file in response.get("files", []):
                 # Process change
-                result.append([{"title": file.get("name"), "id": file.get("id")}])
-                print("Found file: %s (%s)" % (file.get("name"), file.get("id")))
+                result.append({"title": file.get("name"), "id": file.get("id")})
+                logger.debug("Found file: %s (%s)" % (file.get("name"), file.get("id")))
             page_token = response.get("nextPageToken", None)
             if page_token is None:
                 break
@@ -261,11 +308,20 @@ class ApiHandler:
         )
         result = {}
         try:
-            file = self.gdriveService.files().get(fileId=spreadsheetId).execute()
+            file = (
+                self.gdriveService.files()
+                .get(fileId=spreadsheetId, fields="*")
+                .execute()
+            )
             result["id"] = file["id"]
-            result["title"] = file["title"]
-            result["lastModified"] = file["modifiedDate"]
+            result["title"] = file["name"]
+            result["modifiedTime"] = file["modifiedTime"]
         except errors.Error as err:
+            logger.error(
+                "getLastModifiedTimeOfSpreadsheet failed with error: {}".format(err)
+            )
+            return err
+        except Exception as err:
             logger.error(
                 "getLastModifiedTimeOfSpreadsheet failed with error: {}".format(err)
             )
@@ -302,6 +358,9 @@ class ApiHandler:
         except errors.Error as err:
             logger.debug("renameSheet failed with error: {}".format(err))
             return err
+        except Exception as err:
+            logger.debug("renameSheet failed with error: {}".format(err))
+            return err
         return result
 
     def renameSpreadsheet(self, spreadsheetId, newTitle):
@@ -310,21 +369,24 @@ class ApiHandler:
                 spreadsheetId, newTitle
             )
         )
-        body = {"title": newTitle}
+        body = {"name": newTitle}
         try:
             result = (
                 self.gdriveService.files()
-                .patch(fileId=spreadsheetId, body=body, fields="title")
+                .update(fileId=spreadsheetId, body=body)
                 .execute()
             )
         except errors.Error as err:
             logger.error("renameSpreadsheet failed with error: {}".format(err))
             return err
+        except Exception as err:
+            logger.error("renameSpreadsheet failed with error: {}".format(err))
+            return err
         return result
 
-    def batchUpdateValues(self, spreadsheetId, requestBody):
+    def findAndReplace(self, spreadsheetId, requestBody):
         logger.debug(
-            "batchUpdateValues called with spreadsheetId: {}, requestBody: {}".format(
+            "findAndReplace called with spreadsheetId: {}, requestBody: {}".format(
                 spreadsheetId, requestBody
             )
         )
@@ -335,23 +397,36 @@ class ApiHandler:
                 .execute()
             )
         except errors.Error as err:
-            logger.error("batchUpdateValues failed with error: {}".format(err))
+            logger.error("findAndReplace failed with error: {}".format(err))
+            return err
+        except Exception as err:
+            logger.error("findAndReplace failed with error: {}".format(err))
             return err
         return result
 
-    def updateValues(self, spreadsheetId, requestBody):
+    def updateValues(self, spreadsheetId, values, range):
         logger.debug(
-            "updateValues called with spreadsheetId: {}, requestBody: {}".format(
-                spreadsheetId, requestBody
+            "updateValues called with spreadsheetId: {}, values: {}, range:{}".format(
+                spreadsheetId, values, range
             )
         )
+        body = {"values": values}
         try:
             result = (
                 self.sheetService.spreadsheets()
-                .update(spreadsheetId, body=requestBody)
+                .values()
+                .update(
+                    spreadsheetId=spreadsheetId,
+                    body=body,
+                    range=range,
+                    valueInputOption="RAW",
+                )
                 .execute()
             )
         except errors.Error as err:
+            logger.error("updateValues failed with error : {}".format(err))
+            return err
+        except Exception as err:
             logger.error("updateValues failed with error : {}".format(err))
             return err
         return result

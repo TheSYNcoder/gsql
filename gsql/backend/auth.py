@@ -18,25 +18,15 @@ class Auth:
         os.makedirs(self.store_folder, exist_ok=True)
 
     @staticmethod
-    def save_token(self, store_folder):
+    def save_token(creds, store_folder):
         with open(store_folder + "/token.json", "w") as token:
-            token.write(self.creds.to_json())
-
-    def get_token(self):
-        if os.path.exists(self.store_folder + "token.json"):
-            creds = Credentials.from_authorized_user_file(
-                self.store_folder + "/token.json", SCOPES
-            )
-            logger.debug("importing cred from token.json")
-            return creds
-        else:
-            return None
+            token.write(creds.to_json())
 
     def auth(self):
         # The file token.json stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first
         # time.
-        if os.path.exists(self.store_folder + "token.json"):
+        if os.path.exists(self.store_folder + "/token.json"):
             self.creds = Credentials.from_authorized_user_file(
                 self.store_folder + "/token.json", SCOPES
             )
@@ -45,16 +35,18 @@ class Auth:
         if not self.creds or not self.creds.valid:
             if self.creds and self.creds.expired and self.creds.refresh_token:
                 try:
+                    logger.debug("refresh token called!!!")
                     self.creds.refresh(Request())
                 except errors.Error as err:
                     logger.error("Authentication failed: {}".format(err))
                     return err
             else:
+                logger.debug("relogin called")
                 err = self.login()
                 if err:
                     return err
             # Save the credentials for the next run
-            Auth.save_token(self.store_folder)
+            Auth.save_token(self.creds, self.store_folder)
         logger.debug("Authentication successfull")
 
     def login(self):
@@ -70,15 +62,16 @@ class Auth:
             logger.error("Error returned -> {}".format(err))
             return err
         except Exception as err:
-            logger.error(err)
+            logger.error("Error returned -> {}".format(err))
             return err
 
     def logout(self):
         store_folder = os.path.join(os.path.expanduser("~"), ".gsql")
         os.makedirs(store_folder, exist_ok=True)
-        if os.path.exists(store_folder + "token.json"):
+        token_path = os.path.join(store_folder, "token.json")
+        if os.path.exists(token_path):
             try:
-                os.remove(store_folder + "token.json")
+                os.remove(token_path)
             except Exception as err:
                 logger.error(err.__str__())
                 return err
