@@ -5,7 +5,7 @@ from googleapiclient import errors
 def test_logout_success(monkeypatch, mocker):
     mocker.patch.object(os, "remove")
     mocker.patch.object(os.path, "join")
-    os.path.join.return_value = "temp/"
+    os.path.join.return_value = "temp/token.json"
     mocker.patch.object(os.path, "exists")
     os.path.exists.return_value = True
     mocker.patch.object(os, "makedirs")
