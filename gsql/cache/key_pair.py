@@ -1,5 +1,6 @@
 import hashlib
 
+
 class Keypair:
     def __init__(self, key1, key2) -> None:
         self.key1 = key1
