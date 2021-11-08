@@ -4,11 +4,15 @@ from key_pair import Keypair
 from gsql.cache.cache_handler import (
     CacheDict,
     check_json_file_exists,
+    count_lines_in_json,
     create_json_file,
     keys_exists,
     read_from_json,
     remove_key_from_json,
     write_to_json,
+)
+from gsql.cache.constants import (
+    MAXIMUM_SIZE_OF_JSON_FILE
 )
 
 
@@ -30,14 +34,17 @@ class Cachekey:
         """
         Check if the query is executed before
         """
+        if check_json_file_exists():
+            print("Number of lines in json", count_lines_in_json())
+            print("Maximum lines in json ", MAXIMUM_SIZE_OF_JSON_FILE)
         keypair = Keypair(self.db_id, self.sheet_id).generate_hash()
         if self.query_type == "D" or self.query_type == "U":
             if keys_exists(CacheDict, keypair) is True:
                 del CacheDict[keypair]
-                # self.clear_cache()
             else:
                 logger.info("Query not in cache...")
             remove_key_from_json(keypair)
+            self.clear_cache()
             return
         querykey = Keypair(self.query, keypair).generate_hash()
         if keys_exists(CacheDict, keypair, querykey):

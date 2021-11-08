@@ -26,6 +26,14 @@ def keys_exists(element, *keys):
     return True
 
 
+def count_lines_in_json(filename="log_data.json"):
+    with open(filename, "r") as file:
+        try:
+            file_data = json.load(file)
+            return len(file_data)
+        except JSONDecodeError as error:
+            print(error)
+
 def check_json_file_exists(filename="log_data.json") -> bool:
     if os.path.exists(filename):
         return True
@@ -41,21 +49,25 @@ def create_json_file(filename="log_data.json"):
 
 
 def remove_key_from_json(keypair, filename="log_data.json"):
-    with open(filename, "r") as file:
-        try:
-            file_data = json.load(file)
-            if keys_exists(file_data, keypair) is True:
-                del file_data[keypair]
-                logger.info("key removed successfully from file ")
-                print(file_data)
-        except JSONDecodeError as error:
-            print(error)
-    with open(filename, "w") as modified_file:
-        try:
-            json.dump(file_data, modified_file, indent=2)
-            logger.info("file modified successfully")
-        except JSONDecodeError as error:
-            print(error)
+    print("Remove key from json")
+    if check_json_file_exists() == True:
+        with open(filename, "r") as file:
+            try:
+                file_data = json.load(file)
+                if keys_exists(file_data, keypair) is True:
+                    del file_data[keypair]
+                    logger.info("key removed successfully from file ")
+                    print(file_data)
+            except JSONDecodeError as error:
+                print(error)
+        with open(filename, "w") as modified_file:
+            try:
+                json.dump(file_data, modified_file, indent=2)
+                logger.info("file modified successfully")
+            except JSONDecodeError as error:
+                print(error)
+    else:
+        logger.error("file does not exists")
 
 
 def read_from_json(keypair, querypair, filename="log_data.json"):
