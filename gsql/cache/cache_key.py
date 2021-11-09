@@ -1,5 +1,4 @@
 from functools import lru_cache
-from gsql.logging import logger
 from key_pair import Keypair
 from gsql.cache.cache_handler import (
     CacheDict,
@@ -11,7 +10,7 @@ from gsql.cache.cache_handler import (
     remove_key_from_json,
     write_to_json,
 )
-from gsql.cache.constants import MAXIMUM_SIZE_OF_JSON_FILE
+from gsql.cache.constant import MAXIMUM_SIZE_OF_JSON_FILE
 
 
 """
@@ -32,21 +31,18 @@ class Cachekey:
         """
         Check if the query is executed before
         """
-        if check_json_file_exists():
-            print("Number of lines in json", count_lines_in_json())
-            print("Maximum lines in json ", MAXIMUM_SIZE_OF_JSON_FILE)
         keypair = Keypair(self.db_id, self.sheet_id).generate_hash()
         if self.query_type == "D" or self.query_type == "U":
             if keys_exists(CacheDict, keypair) is True:
                 del CacheDict[keypair]
             else:
-                logger.info("Query not in cache...")
+                print("Query not in cache...")
             remove_key_from_json(keypair)
             self.clear_cache()
-            return
+            return None
         querykey = Keypair(self.query, keypair).generate_hash()
         if keys_exists(CacheDict, keypair, querykey):
-            logger.debug("Key found in the cache.....")
+            print("Key found in the cache.....")
             return CacheDict[keypair][querykey]
         else:
             file_exists = check_json_file_exists()
@@ -57,12 +53,12 @@ class Cachekey:
                 CacheDict[keypair] = {}
             if read_data is None:
                 # call to database
-                logger.debug("Key not found in the log file.....")
+                print("Key not found in the log file.....")
                 value = "database call value"
                 CacheDict[keypair][querykey] = value
                 write_to_json(value, keypair, querykey)
             else:
-                logger.debug("Key found in log file, please wait.....")
+                print("Key found in log file, please wait.....")
                 CacheDict[keypair][querykey] = read_data
                 return read_data
 
@@ -71,3 +67,8 @@ class Cachekey:
         clear the lru cache once completed
         """
         self.validate.cache_clear()
+
+    def print_current_and_maxm_contents(filename):
+        if check_json_file_exists():
+            print("Number of lines in json", count_lines_in_json())
+            print("Maximum lines in json ", MAXIMUM_SIZE_OF_JSON_FILE)

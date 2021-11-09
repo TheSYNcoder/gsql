@@ -1,7 +1,7 @@
 import json
-from gsql.logging import logger
 import os
 from json.decoder import JSONDecodeError
+
 
 CacheDict = {}
 
@@ -44,31 +44,29 @@ def check_json_file_exists(filename="log_data.json") -> bool:
 
 def create_json_file(filename="log_data.json"):
     with open(filename, "w") as file:
-        logger.info("File created successfully")
+        print("File created successfully")
         json.dump({}, file)
         file.close()
 
 
 def remove_key_from_json(keypair, filename="log_data.json"):
-    print("Remove key from json")
     if check_json_file_exists() is True:
         with open(filename, "r") as file:
             try:
                 file_data = json.load(file)
                 if keys_exists(file_data, keypair) is True:
                     del file_data[keypair]
-                    logger.info("key removed successfully from file ")
-                    print(file_data)
+                    print("key removed successfully from file")
             except JSONDecodeError as error:
                 print(error)
         with open(filename, "w") as modified_file:
             try:
                 json.dump(file_data, modified_file, indent=2)
-                logger.info("file modified successfully")
+                print("file modified successfully")
             except JSONDecodeError as error:
                 print(error)
     else:
-        logger.error("file does not exists")
+        print("file does not exists")
 
 
 def read_from_json(keypair, querypair, filename="log_data.json"):
@@ -77,9 +75,12 @@ def read_from_json(keypair, querypair, filename="log_data.json"):
             try:
                 file_data = json.load(file)
                 if keys_exists(file_data, keypair, querypair):
+                    print("Data present in json file")
                     return file_data[keypair][querypair]
             except JSONDecodeError as error:
                 print(error)
+    else:
+        return
 
 
 def append_to_json(data, filename="log_data.json", *keys):
@@ -91,7 +92,7 @@ def append_to_json(data, filename="log_data.json", *keys):
             file_data[keys[0]][keys[1]] = data
             file.seek(0)
             json.dump(file_data, file, indent=2)
-            logger.info("Data appended successfully...............")
+            print("Data appended successfully...............")
         except JSONDecodeError as error:
             print(error)
 
