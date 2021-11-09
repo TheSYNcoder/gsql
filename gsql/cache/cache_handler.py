@@ -34,6 +34,7 @@ def count_lines_in_json(filename="log_data.json"):
         except JSONDecodeError as error:
             print(error)
 
+
 def check_json_file_exists(filename="log_data.json") -> bool:
     if os.path.exists(filename):
         return True
@@ -50,7 +51,7 @@ def create_json_file(filename="log_data.json"):
 
 def remove_key_from_json(keypair, filename="log_data.json"):
     print("Remove key from json")
-    if check_json_file_exists() == True:
+    if check_json_file_exists() is True:
         with open(filename, "r") as file:
             try:
                 file_data = json.load(file)

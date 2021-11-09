@@ -11,9 +11,7 @@ from gsql.cache.cache_handler import (
     remove_key_from_json,
     write_to_json,
 )
-from gsql.cache.constants import (
-    MAXIMUM_SIZE_OF_JSON_FILE
-)
+from gsql.cache.constants import MAXIMUM_SIZE_OF_JSON_FILE
 
 
 """
