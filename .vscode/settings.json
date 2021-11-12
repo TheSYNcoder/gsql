@@ -1,0 +1,4 @@
+{
+    "python.pythonPath": "/Users/shuvayan/.pyenv/versions/3.9.7/bin/python",
+    "python.formatting.provider": "black"
+}

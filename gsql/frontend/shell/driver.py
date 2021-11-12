@@ -1,9 +1,12 @@
+from gsql.backend.sqlite_manager import SQLiteManager
 from gsql.frontend.constants import Commands
 from gsql.logging import logger
 from gsql.frontend.shell.shell import GSQLShell
 from rich import print
 from gsql.backend.auth import Auth
 from gsql.console import console
+from gsql.backend.api_handler import ApiHandler
+import sys
 
 
 class GSQLDriver:
@@ -14,11 +17,13 @@ class GSQLDriver:
     def __init__(self, action: str) -> None:
         self.action = action
         logger.debug("GSQL called with action :{}".format(self.action))
-        self.shell_instance = GSQLShell()
+        self.shell_instance = None
+        self.auth = Auth()
+        self.api = None
+        self.sqlite_manager = SQLiteManager()
 
     def authenticate(self):
-        auth = Auth()
-        err = auth.auth()
+        err = self.auth.auth()
         if err:
             logger.error("Authentication failed: {}".format(err))
             console.print("[red]Authentication failed!!!")
@@ -43,6 +48,22 @@ class GSQLDriver:
         print("help")
 
     def start_shell(self):
+        # check if not authenticated force the user to authenticate
+        err = self.auth.auth()
+        if err:
+            logger.error("Authentication failed: {}".format(err))
+            console.print("[red]Authentication failed!!!")
+            sys.exit(0)
+
+        # fetch all databases before starting gsql shell
+        with console.status(
+            "Preparing and personalizing GSQL for you ....", spinner="bouncingBall"
+        ):
+            if self.api is None:
+                self.api = ApiHandler(Auth.get_creds())
+            result = self.api.getAllSpreadsheetInfo()
+            self.sqlite_manager._write_to_common(result)
+            self.shell_instance = GSQLShell()
         self.shell_instance.cmdloop()
 
     def error_(self):

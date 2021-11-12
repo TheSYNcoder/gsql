@@ -21,11 +21,21 @@ class Auth:
         with open(os.path.join(self.store_folder, "token.json"), "w") as token:
             token.write(self.creds.to_json())
 
+    @staticmethod
+    def get_creds():
+        """
+        static method to get the credentials
+        """
+        store_folder = os.path.join(os.path.expanduser("~"), ".gsql")
+        return Credentials.from_authorized_user_file(
+            os.path.join(store_folder, "token.json"), SCOPES
+        )
+
     def auth(self):
         # The file token.json stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first
         # time.
-        if os.path.exists(self.store_folder + "/token.json"):
+        if os.path.exists(os.path.join(self.store_folder, "token.json")):
             self.creds = Credentials.from_authorized_user_file(
                 os.path.join(self.store_folder, "token.json"), SCOPES
             )
